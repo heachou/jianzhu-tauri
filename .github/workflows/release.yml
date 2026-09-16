@@ -1,0 +1,81 @@
+name: Build and Release Tauri App
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            args: "--target x86_64-pc-windows-msvc"
+          - name: macOS Apple Silicon
+            os: macos-14
+            target: aarch64-apple-darwin
+            args: "--target aarch64-apple-darwin"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build Tauri application
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: .
+          args: ${{ matrix.args }}
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: "standard-search-[platform]-[arch]-[bundle]"
+          tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/v') && format('标准检索台 {0}', github.ref_name) || '' }}
+          releaseBody: "标准检索台跨平台安装包。Windows 提供 NSIS EXE/MSI，macOS 提供 DMG。"
+          releaseDraft: true
+          prerelease: false
+          generateReleaseNotes: true
+
+      - name: Upload Windows installer files
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: standard-search-windows-installers
+          if-no-files-found: error
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe
+            src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+
+      - name: Upload macOS installer files
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: standard-search-macos-installers
+          if-no-files-found: error
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.app

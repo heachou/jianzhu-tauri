@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="220" fill="#14213D"/>
+  <circle cx="790" cy="220" r="150" fill="#F06D4F" opacity="0.95"/>
+  <circle cx="250" cy="820" r="190" fill="#83C5BE" opacity="0.9"/>
+  <text x="512" y="650" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="470" font-weight="900" fill="#F7F4ED">标</text>
+</svg>
