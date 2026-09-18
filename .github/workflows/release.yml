@@ -44,6 +44,15 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Verify bundled data
+        shell: bash
+        run: |
+          test -d data
+          test -f data/manifest.json
+          test "$(find data -maxdepth 1 -type f -name 'items-pages-*.json' | wc -l | tr -d ' ')" = "15"
+          grep -q 'items-pages-001-010.json' data/manifest.json
+          grep -q 'items-pages-141-146.json' data/manifest.json
+
       - name: Build Tauri application
         uses: tauri-apps/tauri-action@v1
         env:
