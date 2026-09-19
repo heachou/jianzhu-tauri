@@ -33,7 +33,13 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-Windows 安装包会生成 `.exe` 和 `.msi`；macOS Apple Silicon 会生成 `.dmg`。首次使用前，请在仓库的 Actions 设置中确认工作流允许写入 `Contents`，因为标签发布需要 `contents: write` 权限。
+Windows 安装包会生成 `.exe` 和 `.msi`；macOS Apple Silicon 会生成 `.dmg`。标签发布需要 `contents: write` 权限。
+
+如果出现 `Resource not accessible by integration`：
+
+1. 打开仓库 `Settings → Actions → General`。
+2. 在 `Workflow permissions` 中选择 `Read and write permissions`，保存后重新运行工作流。
+3. 如果组织策略禁止 `GITHUB_TOKEN` 创建 Release，创建一个具备仓库 `Contents: Read and write` 权限的 Fine-grained PAT，并在仓库 `Settings → Secrets and variables → Actions` 中保存为 `RELEASE_TOKEN`。工作流会优先使用该 Secret。
 
 ## 数据爬虫
 
